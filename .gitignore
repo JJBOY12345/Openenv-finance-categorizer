@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Pytest
+.pytest_cache/
+.pytest_tmp/
+pytest-cache-files-*/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# VS Code
+.vscode/
+
+# Environment variables
+.env
+
+# Build / dist
+build/
+dist/
+*.egg-info/
+
+# Jupyter (if ever used)
+.ipynb_checkpoints/
+
+# Coverage (if added later)
+.coverage
+htmlcov/
+
+# OpenEnv / runtime artifacts (future-safe)
+*.lock
+uv.lock
+
+# Docker (optional)
+*.tar
