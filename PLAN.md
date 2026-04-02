@@ -13,9 +13,9 @@ Current sequence status:
 1. [x] Lock domain and action/state schemas
 2. [x] Implement minimal valid environment core
 3. [x] Implement easy task and grader first
-4. [~] Add medium and hard tasks
-5. [~] Add reward shaping and validation polish
-6. [ ] Add baseline script
+4. [x] Add medium and hard tasks
+5. [~] Add baseline script
+6. [~] Add reward shaping and validation polish
 7. [ ] Add Docker / HF deployment docs
 8. [ ] Finalize README and submission checks
 
@@ -74,7 +74,7 @@ Implement valid episode lifecycle and ledger state transitions.
 ---
 
 ## Milestone 3 - Task Fixtures and Graders
-**Status:** [~] Partial
+**Status:** [x] Implemented
 
 ### Goal
 Create three deterministic tasks with hidden answer keys and scoring.
@@ -82,22 +82,24 @@ Create three deterministic tasks with hidden answer keys and scoring.
 ### Status by output
 - [x] Easy task fixture
 - [x] Medium task fixture
-- [ ] Hard task fixture
+- [x] Hard task fixture
 - [x] Easy grader
-- [x] Medium grader support
-- [ ] Hard grader
+- [x] Medium grader
+- [x] Hard grader
 - [x] Score aggregation logic in `[0.0, 1.0]`
 - [x] Hidden answer keys kept private while remaining available to graders
 
 ### Validation completed
 - [x] Easy grader returns stable score for same final state
 - [x] Medium grader returns stable score for same final state
+- [x] Hard grader returns stable score for same final state
 - [x] Easy scores are not constant
 - [x] Medium scores are not constant
-- [ ] Hard task validation
+- [x] Hard scores are not constant
+- [x] Easy / medium / hard can all be reset deterministically
 
 ### Exit criteria
-- [ ] Easy / medium / hard can all be reset and graded independently
+- [x] Easy / medium / hard can all be reset and graded independently
 
 ---
 
@@ -129,19 +131,23 @@ Make reward informative over the full trajectory.
 ---
 
 ## Milestone 5 - Baseline Evaluation Script
-**Status:** [ ] Planned
+**Status:** [~] Partial
 
 ### Goal
 Provide reproducible baseline inference over all tasks.
 
 ### Status by output
-- [ ] Baseline script using OpenAI API client
-- [ ] Env-var based credential loading
-- [ ] Deterministic task ordering / settings
-- [ ] Score reporting output
+- [x] Root-level `inference.py` exists
+- [x] OpenAI client wiring uses `API_BASE_URL`, `MODEL_NAME`, and `HF_TOKEN`
+- [x] Deterministic task ordering covers easy / medium / hard
+- [x] Per-task and aggregate score reporting output exists
+- [x] Malformed-output fallback behavior exists
+- [x] Debug output exists for request/parsing failures and fallback-driven runs
+- [ ] Live baseline execution validated against a configured endpoint
+- [ ] Reproducible evaluation confirmed under a real endpoint setup
 
 ### Exit criteria
-- [ ] Baseline completes successfully and writes a consistent summary
+- [ ] Baseline completes successfully under configured credentials and writes a consistent summary
 
 ---
 

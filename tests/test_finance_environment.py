@@ -215,3 +215,94 @@ def test_medium_grader_penalizes_transfer_confusion_and_early_finalize():
     assert result.categorized_accuracy == 0.0
     assert result.completion_ratio == 0.2
     assert result.premature_finalize is True
+
+
+def test_hard_task_reset_selects_fixture_without_leaking_answers():
+    env = FinanceEnvironment()
+
+    observation = env.reset(task_id="hard_operational_ledger_v1")
+    state_dump = env.state.model_dump()
+    observation_dump = observation.model_dump()
+
+    assert observation.task_id == "hard_operational_ledger_v1"
+    assert observation.difficulty.value == "hard"
+    assert observation.ledger_summary.unresolved_count == 8
+    assert observation.current_transaction_id == "txn_h001"
+    assert "answer_key" not in state_dump
+    assert "answer_key" not in observation_dump
+
+
+def test_hard_grader_rewards_correct_complete_run():
+    env = FinanceEnvironment()
+    env.reset(task_id="hard_operational_ledger_v1")
+
+    actions = [
+        ("txn_h001", CategoryName.SUBSCRIPTIONS),
+        ("txn_h002", CategoryName.SHOPPING),
+        ("txn_h003", CategoryName.TRANSFER),
+        ("txn_h004", CategoryName.TRANSFER),
+        ("txn_h005", CategoryName.TRANSFER),
+        ("txn_h006", CategoryName.FEES),
+        ("txn_h007", CategoryName.DINING),
+        ("txn_h008", CategoryName.HEALTHCARE),
+    ]
+    for transaction_id, category in actions:
+        env.step(
+            FinanceAction(
+                action_type=ActionType.CATEGORIZE_TRANSACTION,
+                transaction_id=transaction_id,
+                category=category,
+            )
+        )
+    env.step(FinanceAction(action_type=ActionType.FINALIZE))
+
+    result = env.grade_episode()
+
+    assert result.score == 1.0
+    assert result.categorized_accuracy == 1.0
+    assert result.completion_ratio == 1.0
+    assert result.premature_finalize is False
+
+
+def test_hard_grader_penalizes_wrong_categorization():
+    env = FinanceEnvironment()
+    env.reset(task_id="hard_operational_ledger_v1")
+
+    env.step(
+        FinanceAction(
+            action_type=ActionType.CATEGORIZE_TRANSACTION,
+            transaction_id="txn_h006",
+            category=CategoryName.UTILITIES,
+        )
+    )
+    env.step(
+        FinanceAction(
+            action_type=ActionType.CATEGORIZE_TRANSACTION,
+            transaction_id="txn_h007",
+            category=CategoryName.DINING,
+        )
+    )
+    env.step(FinanceAction(action_type=ActionType.FINALIZE))
+
+    result = env.grade_episode()
+
+    assert 0.0 <= result.score <= 1.0
+    assert result.score < 0.5
+    assert result.categorized_accuracy == 0.5
+    assert result.completion_ratio == 0.25
+    assert result.premature_finalize is True
+
+
+def test_hard_grader_penalizes_premature_finalize():
+    env = FinanceEnvironment()
+    env.reset(task_id="hard_operational_ledger_v1")
+
+    env.step(FinanceAction(action_type=ActionType.FINALIZE))
+
+    result = env.grade_episode()
+
+    assert 0.0 <= result.score <= 1.0
+    assert result.score == 0.0
+    assert result.categorized_accuracy == 0.0
+    assert result.completion_ratio == 0.0
+    assert result.premature_finalize is True

@@ -20,7 +20,7 @@ from uuid import uuid4
 from openenv.core.env_server.interfaces import Environment
 
 try:
-    from ..grading import grade_easy_task, grade_medium_task
+    from ..grading import grade_easy_task, grade_hard_task, grade_medium_task
     from ..models import (
         ActionHistoryEntry,
         ActionType,
@@ -38,7 +38,7 @@ try:
         TransactionRecord,
     )
 except ImportError:
-    from finance_env.grading import grade_easy_task, grade_medium_task
+    from finance_env.grading import grade_easy_task, grade_hard_task, grade_medium_task
     from models import (
         ActionHistoryEntry,
         ActionType,
@@ -188,9 +188,105 @@ MEDIUM_TASK_FIXTURE = TaskFixture(
     },
 )
 
+HARD_TASK_FIXTURE = TaskFixture(
+    task_id="hard_operational_ledger_v1",
+    difficulty=DifficultyLevel.HARD,
+    task_description=(
+        "Categorize a challenging operational ledger with ambiguous merchants, "
+        "transfer-versus-income confusion, fee classification, and similar merchant "
+        "names that require careful reading of memo and channel details."
+    ),
+    max_steps=14,
+    transactions=[
+        TransactionRecord(
+            transaction_id="txn_h001",
+            merchant="APPLE.COM/BILL",
+            amount=-10.99,
+            currency="USD",
+            posted_date="2026-03-14",
+            memo="iCloud+ monthly storage",
+            channel="card",
+        ),
+        TransactionRecord(
+            transaction_id="txn_h002",
+            merchant="APPLE FIFTH AVE",
+            amount=-1299.00,
+            currency="USD",
+            posted_date="2026-03-15",
+            memo="MacBook purchase",
+            channel="card",
+        ),
+        TransactionRecord(
+            transaction_id="txn_h003",
+            merchant="PAYPAL TRANSFER",
+            amount=250.00,
+            currency="USD",
+            posted_date="2026-03-16",
+            memo="Move money from PayPal balance",
+            channel="ach",
+        ),
+        TransactionRecord(
+            transaction_id="txn_h004",
+            merchant="PAYPAL *JONMARTIN",
+            amount=75.00,
+            currency="USD",
+            posted_date="2026-03-16",
+            memo="Birthday reimbursement from Jon",
+            channel="ach",
+        ),
+        TransactionRecord(
+            transaction_id="txn_h005",
+            merchant="VENMO CASHOUT",
+            amount=-300.00,
+            currency="USD",
+            posted_date="2026-03-17",
+            memo="Transfer to checking",
+            channel="ach",
+        ),
+        TransactionRecord(
+            transaction_id="txn_h006",
+            merchant="BANK OF METRO",
+            amount=-35.00,
+            currency="USD",
+            posted_date="2026-03-18",
+            memo="Monthly service charge",
+            channel="bank_fee",
+        ),
+        TransactionRecord(
+            transaction_id="txn_h007",
+            merchant="SQ *NORA CAFE",
+            amount=-14.80,
+            currency="USD",
+            posted_date="2026-03-18",
+            memo="Lunch meeting",
+            channel="card",
+        ),
+        TransactionRecord(
+            transaction_id="txn_h008",
+            merchant="SQ *NORA STUDIO",
+            amount=-48.00,
+            currency="USD",
+            posted_date="2026-03-19",
+            memo="Yoga class pack",
+            channel="card",
+        ),
+    ],
+    answer_key={
+        "txn_h001": CategoryName.SUBSCRIPTIONS,
+        "txn_h002": CategoryName.SHOPPING,
+        "txn_h003": CategoryName.TRANSFER,
+        "txn_h004": CategoryName.TRANSFER,
+        "txn_h005": CategoryName.TRANSFER,
+        "txn_h006": CategoryName.FEES,
+        "txn_h007": CategoryName.DINING,
+        "txn_h008": CategoryName.HEALTHCARE,
+    },
+)
+
 TASK_FIXTURES = {
     EASY_TASK_FIXTURE.task_id: EASY_TASK_FIXTURE,
     MEDIUM_TASK_FIXTURE.task_id: MEDIUM_TASK_FIXTURE,
+    HARD_TASK_FIXTURE.task_id: HARD_TASK_FIXTURE,
 }
 
 
@@ -284,6 +380,7 @@ class FinanceEnvironment(Environment):
         grader = {
             EASY_TASK_FIXTURE.task_id: grade_easy_task,
             MEDIUM_TASK_FIXTURE.task_id: grade_medium_task,
+            HARD_TASK_FIXTURE.task_id: grade_hard_task,
         }.get(self._state.task_id, grade_easy_task)
         return grader(
             state=self._state,

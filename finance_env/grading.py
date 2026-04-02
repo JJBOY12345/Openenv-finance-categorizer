@@ -69,3 +69,12 @@ def grade_medium_task(
     """Grade the medium task using the shared categorization rubric."""
 
     return grade_categorization_task(state=state, answer_key=answer_key)
+
+
+def grade_hard_task(
+    state: FinanceState,
+    answer_key: Mapping[str, CategoryName],
+) -> FinanceGraderResult:
+    """Grade the hard task using the shared categorization rubric."""
+
+    return grade_categorization_task(state=state, answer_key=answer_key)

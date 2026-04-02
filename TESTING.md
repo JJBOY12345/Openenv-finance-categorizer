@@ -72,6 +72,22 @@ The baseline script must:
 - complete without manual intervention
 - behave reproducibly under same configuration
 
+Local baseline run:
+```powershell
+$env:API_BASE_URL="https://router.huggingface.co/v1"
+$env:MODEL_NAME="Qwen/Qwen2.5-7B-Instruct:together"
+$env:HF_TOKEN="<YOUR_HF_TOKEN>"
+.\.venv\Scripts\python inference.py
+```
+
+Expected baseline behavior:
+- iterates over `easy_budget_cleanup_v1`, `medium_ambiguous_ledger_v1`, and `hard_operational_ledger_v1`
+- prints one summary line per task
+- prints an overall average score
+- falls back to a deterministic local categorization heuristic when model output is malformed
+- prints debug lines when request failure or parsing failure triggers fallback
+- reports per-task `model_actions`, `fallbacks`, and whether the run was fallback-driven
+
 ---
 
 ## Docker / Deployment Validation

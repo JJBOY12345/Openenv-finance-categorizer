@@ -45,3 +45,9 @@ uv.lock
 
 # Docker (optional)
 *.tar
+
+#files to ignore
+AGENTS.md
+PROGRESS.md
+DECISIONS.md
+TASKS.md

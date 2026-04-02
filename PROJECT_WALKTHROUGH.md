@@ -26,9 +26,8 @@ The agent works step by step:
 Today, the environment supports:
 - an easy task
 - a medium task
-- deterministic grading for both
-
-The hard task is still planned.
+- a hard task
+- deterministic grading for all three
 
 ---
 
@@ -37,6 +36,7 @@ Important files:
 - `finance_env/models.py`: typed models for actions, observations, state, rewards, fixtures, and grading results
 - `finance_env/server/finance_env_environment.py`: the environment logic
 - `finance_env/grading.py`: deterministic grader functions
+- `inference.py`: root-level baseline runner using the OpenAI client
 - `tests/test_finance_environment.py`: behavior and grading tests
 - `PLAN.md`: milestone status
 - `TASKS.md`: checklist of concrete work
@@ -301,13 +301,22 @@ Examples:
 - `AMZN Mktp US` household goods -> shopping
 
 ### Hard task
-Still planned.
+Task id:
+- `hard_operational_ledger_v1`
 
-The hard task is expected to introduce richer cases such as:
-- split transactions
-- duplicates
-- anomalies
-- tighter step budget
+Purpose:
+- ambiguous merchants with similar names
+- transfer-versus-income confusion
+- subscription-versus-shopping confusion
+- fees-versus-expenses classification
+- more transactions and tighter operational reading requirements
+
+Examples:
+- `APPLE.COM/BILL` service charge -> subscriptions
+- `APPLE FIFTH AVE` hardware purchase -> shopping
+- `PAYPAL TRANSFER` positive inflow -> transfer, not income
+- `BANK OF METRO` service charge -> fees
+- `SQ *NORA CAFE` versus `SQ *NORA STUDIO` -> different categories despite similar merchant prefix
 
 ---
 
@@ -338,19 +347,20 @@ Because fixtures and answers are fixed, the same state always gives the same gra
 - typed finance models
 - easy task
 - medium task
+- hard task
 - deterministic easy grader
 - deterministic medium grader support
+- deterministic hard grader support
+- baseline inference script
+- Hugging Face router-compatible baseline path
 - reward shaping for current categorization flow
 - hidden-answer protection in public observation/state
-- tests for easy and medium task behavior
+- tests for easy, medium, and hard task behavior
 
 ### Planned
-- hard task
-- hard grader
 - split actions
 - duplicate/anomaly handling
 - stronger anti-loop penalties
-- baseline script
 - Docker and Hugging Face validation
 - final README rewrite
 - `openenv validate`
@@ -363,9 +373,7 @@ This section explains what the project is expected to grow into, and what is int
 
 ### 9.1 Near-Term Next Steps
 These are the next logical project steps based on the current milestone plan:
-- add the hard task fixture
-- add the hard-task deterministic grader
-- expand reward shaping only where the hard task truly needs it
+- expand reward shaping now that all three tasks are in place
 - decide whether split transactions are necessary for the first submission-ready hard task
 
 The main idea is to keep building outward from the stable easy/medium foundation instead of rewriting the current loop.
@@ -381,14 +389,13 @@ These are planned because they make the environment more realistic, but they are
 
 ### 9.3 Planned Submission Work
 After the three tasks and graders are complete, the project still needs:
-- baseline inference script using the OpenAI API client
 - OpenEnv validation
 - Docker verification
 - Hugging Face Space readiness
 - final README rewrite
 - full submission checklist pass
 
-These are required for the hackathon, but they are intentionally sequenced after the core environment and grading logic.
+The baseline script now exists, but it still needs live endpoint validation under configured credentials. The remaining items are required for the hackathon and are intentionally sequenced after the core environment and grading logic.
 
 ### 9.4 Scope Boundaries
 The project is intentionally not trying to become a full financial product.
@@ -417,6 +424,14 @@ Future changes should preserve these rules:
 Run the tests:
 ```powershell
 .\.venv\Scripts\pytest -q
+```
+
+Run the baseline with the recommended Hugging Face router settings:
+```powershell
+$env:API_BASE_URL="https://router.huggingface.co/v1"
+$env:MODEL_NAME="Qwen/Qwen2.5-7B-Instruct:together"
+$env:HF_TOKEN="<YOUR_HF_TOKEN>"
+.\.venv\Scripts\python inference.py
 ```
 
 Try the easy task interactively:
@@ -454,6 +469,28 @@ print(obs.unresolved_transactions[0].model_dump())
 obs = env.step(FinanceAction(
     action_type=ActionType.CATEGORIZE_TRANSACTION,
     transaction_id="txn_m001",
+    category=CategoryName.SUBSCRIPTIONS,
+))
+print(obs.model_dump())
+
+print(env.grade_episode().model_dump())
+'@ | .\.venv\Scripts\python -
+```
+
+Try the hard task interactively:
+```powershell
+@'
+from finance_env.server.finance_env_environment import FinanceEnvironment
+from finance_env.models import FinanceAction, ActionType, CategoryName
+
+env = FinanceEnvironment()
+obs = env.reset(task_id="hard_operational_ledger_v1")
+print(obs.task_id)
+print(obs.unresolved_transactions[0].model_dump())
+
+obs = env.step(FinanceAction(
+    action_type=ActionType.CATEGORIZE_TRANSACTION,
+    transaction_id="txn_h001",
     category=CategoryName.SUBSCRIPTIONS,
 ))
 print(obs.model_dump())
