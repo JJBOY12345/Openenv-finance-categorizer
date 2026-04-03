@@ -14,9 +14,9 @@ Current sequence status:
 2. [x] Implement minimal valid environment core
 3. [x] Implement easy task and grader first
 4. [x] Add medium and hard tasks
-5. [~] Add baseline script
+5. [x] Add baseline script
 6. [~] Add reward shaping and validation polish
-7. [ ] Add Docker / HF deployment docs
+7. [~] Add Docker / HF deployment docs
 8. [ ] Finalize README and submission checks
 
 ---
@@ -104,7 +104,7 @@ Create three deterministic tasks with hidden answer keys and scoring.
 ---
 
 ## Milestone 4 - Reward Shaping
-**Status:** [~] Partial
+**Status:** [x] Implemented
 
 ### Goal
 Make reward informative over the full trajectory.
@@ -140,32 +140,36 @@ Provide reproducible baseline inference over all tasks.
 - [x] Root-level `inference.py` exists
 - [x] OpenAI client wiring uses `API_BASE_URL`, `MODEL_NAME`, and `HF_TOKEN`
 - [x] Deterministic task ordering covers easy / medium / hard
-- [x] Per-task and aggregate score reporting output exists
+- [x] Required structured stdout logging exists
 - [x] Malformed-output fallback behavior exists
+- [x] Small retry/backoff behavior exists for transient provider errors
+- [x] Fixed-order model failover exists for the primary Hugging Face path
 - [x] Debug output exists for request/parsing failures and fallback-driven runs
-- [ ] Live baseline execution validated against a configured endpoint
-- [ ] Reproducible evaluation confirmed under a real endpoint setup
+- [x] Debug output is routed to stderr
+- [x] Live baseline execution validated against a configured endpoint
+- [~] Reproducible evaluation: real model connectivity confirmed, but provider instability still causes partial fallback on hard task runs
 
 ### Exit criteria
-- [ ] Baseline completes successfully under configured credentials and writes a consistent summary
+- [x] Baseline completes successfully under configured credentials and writes a consistent summary
 
 ---
 
 ## Milestone 6 - Packaging and Deployment
-**Status:** [ ] Planned
+**Status:** [~] Partial
 
 ### Goal
 Make the project submission-ready.
 
 ### Status by output
-- [ ] Dockerfile verified
-- [ ] Local run instructions
-- [ ] HF Space deployment instructions
-- [ ] Required endpoints documented / exposed
-- [ ] README completion
+- [x] Dockerfile verified
+- [x] Local container run path verified
+- [x] OpenEnv local validation checks passed
+- [x] HF Space deployment instructions and repo structural configuration exist
+- [x] Required endpoints documented / exposed
+- [x] README completion
 
 ### Exit criteria
-- [ ] Repo is ready for local validation and HF deployment
+- [x] Repo is ready for HF deployment
 
 ---
 

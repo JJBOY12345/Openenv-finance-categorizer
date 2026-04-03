@@ -1,3 +1,16 @@
+---
+title: Finance Env Environment Server
+emoji: 🎬
+colorFrom: blue
+colorTo: purple
+sdk: docker
+pinned: false
+app_port: 8000
+base_path: /web
+tags:
+  - openenv
+---
+
 # Finance Transaction Categorizer Environment
 
 This is a production-quality OpenEnv environment built for the Meta PyTorch OpenEnv Hackathon. It simulates a real-world **personal finance workflow** where a user (or agent) is given messy bank and credit-card transactions and must categorize them to build an accurate budgeting ledger.
@@ -44,7 +57,7 @@ uvicorn finance_env.server.app:app --reload
 
 ### Docker
 ```bash
-docker build -t finance_env:latest -f finance_env/server/Dockerfile .
+docker build -t finance_env:latest .
 docker run -p 8000:8000 finance_env:latest
 ```
 
@@ -92,4 +105,30 @@ python inference.py
 
 ## 6. Hugging Face Deployment
 
-This project is configured as a Hugging Face Docker Space. Please see the primary `README.md` at the root of the repository for exact `git`-based deployment instructions and verification endpoints (`/health` and `/reset`).
+This project is configured as a Hugging Face Docker Space. The root `README.md` handles the configuration, and the root `Dockerfile` defines the container.
+
+### Git Deployment Steps
+To deploy the code to a Space:
+
+```bash
+# Set up git remote for your Hugging Face Space (replace with your Space URL)
+git remote add space https://huggingface.co/spaces/<your_username>/finance_env
+
+# Push to deploy automatically on the Hugging Face hub
+git push space main
+```
+
+### Endpoint Verification
+Once deployed, the Space automatically builds and exposes standard OpenEnv HTTP endpoints:
+
+1. **/health**: Verify container readiness.
+   ```bash
+   curl -X GET "https://<your_username>-finance-env.hf.space/health"
+   # Expected Output: {"status":"healthy"}
+   ```
+
+2. **/reset**: Create an initial environment episode step.
+   ```bash
+   curl -X POST "https://<your_username>-finance-env.hf.space/reset" -H "Content-Type: application/json" -d "{}"
+   # Expected Output: Valid FinanceObservation JSON payload.
+   ```

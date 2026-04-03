@@ -351,19 +351,19 @@ Because fixtures and answers are fixed, the same state always gives the same gra
 - deterministic easy grader
 - deterministic medium grader support
 - deterministic hard grader support
-- baseline inference script
+- baseline inference script via root-level `inference.py` utilizing the OpenAI client with `API_BASE_URL`, `MODEL_NAME`, and `HF_TOKEN`
 - Hugging Face router-compatible baseline path
+- strict `[START] / [STEP] / [END]` stdout logging and stderr debug split for the baseline
 - reward shaping for current categorization flow
 - hidden-answer protection in public observation/state
 - tests for easy, medium, and hard task behavior
+- Docker build encapsulation
+- local `openenv validate` verification
 
 ### Planned
 - split actions
 - duplicate/anomaly handling
 - stronger anti-loop penalties
-- Docker and Hugging Face validation
-- final README rewrite
-- `openenv validate`
 
 ---
 
@@ -389,10 +389,6 @@ These are planned because they make the environment more realistic, but they are
 
 ### 9.3 Planned Submission Work
 After the three tasks and graders are complete, the project still needs:
-- OpenEnv validation
-- Docker verification
-- Hugging Face Space readiness
-- final README rewrite
 - full submission checklist pass
 
 The baseline script now exists, but it still needs live endpoint validation under configured credentials. The remaining items are required for the hackathon and are intentionally sequenced after the core environment and grading logic.
@@ -433,6 +429,24 @@ $env:MODEL_NAME="Qwen/Qwen2.5-7B-Instruct:together"
 $env:HF_TOKEN="<YOUR_HF_TOKEN>"
 .\.venv\Scripts\python inference.py
 ```
+
+Baseline logging contract:
+- stdout emits only:
+  - `[START] ...`
+  - `[STEP] ...`
+  - `[END] ...`
+- stderr carries debug information such as:
+  - request failures
+  - parse failures
+  - raw model output previews
+  - fallback reasons
+
+Fallback behavior:
+- deterministic
+- uses only public observation data
+- intentionally non-oracular
+- defaults to safer low-confidence choices such as `uncategorized` when signals are weak
+- before local fallback, the baseline now retries short-lived provider failures and can switch from `Qwen/Qwen2.5-7B-Instruct:together` to `Qwen/Qwen2.5-7B-Instruct:fastest`
 
 Try the easy task interactively:
 ```powershell
