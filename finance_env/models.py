@@ -96,7 +96,7 @@ class RewardBreakdown(FinanceBaseModel):
 class FinanceReward(FinanceBaseModel):
     """Typed reward record aligned with the scalar reward returned by OpenEnv."""
 
-    value: float = Field(..., description="Net reward for the last environment step")
+    value: float = Field(..., ge=0.0, le=1.0, description="Net reward for the last environment step")
     breakdown: RewardBreakdown = Field(
         default_factory=RewardBreakdown,
         description="Decomposed reward components for debugging",

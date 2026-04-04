@@ -660,6 +660,7 @@ class FinanceEnvironment(Environment):
             + step_penalty,
             4,
         )
+        total = max(0.0, min(1.0, total))
         return FinanceReward(value=total, breakdown=breakdown, reason=reason)
 
 

@@ -10,7 +10,6 @@ from dataclasses import dataclass
 from typing import Any
 
 from dotenv import load_dotenv
-from huggingface_hub import get_token
 from openai import OpenAI
 from pydantic import ValidationError
 
@@ -50,18 +49,17 @@ def load_config() -> BaselineConfig:
     """Load required environment variables and fail clearly if missing."""
 
     load_dotenv()
-    hf_token = os.getenv("HF_TOKEN") or get_token()
     required = {
         "API_BASE_URL": os.getenv("API_BASE_URL"),
         "MODEL_NAME": os.getenv("MODEL_NAME"),
-        "HF_TOKEN": hf_token,
+        "HF_TOKEN": os.getenv("HF_TOKEN"),
     }
     missing = [name for name, value in required.items() if not value]
     if missing:
         raise SystemExit(
             "Missing required environment variables: "
             + ", ".join(missing)
-            + ". Set API_BASE_URL and MODEL_NAME, and provide HF_TOKEN or log in with 'hf auth login' before running inference.py."
+            + ". Set API_BASE_URL, MODEL_NAME, and HF_TOKEN before running inference.py."
         )
 
     return BaselineConfig(
