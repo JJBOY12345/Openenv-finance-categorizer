@@ -41,7 +41,7 @@ htmlcov/
 
 # OpenEnv / runtime artifacts (future-safe)
 *.lock
-uv.lock
+!uv.lock
 
 # Docker (optional)
 *.tar
