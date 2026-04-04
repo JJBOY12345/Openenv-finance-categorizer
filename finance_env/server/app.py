@@ -38,7 +38,7 @@ except Exception as e:  # pragma: no cover
 try:
     from ..models import FinanceAction, FinanceObservation
     from .finance_env_environment import FinanceEnvironment
-except ModuleNotFoundError:
+except ImportError:
     from models import FinanceAction, FinanceObservation
     from server.finance_env_environment import FinanceEnvironment
 
@@ -81,4 +81,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", type=int, default=8000)
     args = parser.parse_args()
-    main(port=args.port)
+    if args.port == 8000:
+        main()
+    else:
+        main(port=args.port)

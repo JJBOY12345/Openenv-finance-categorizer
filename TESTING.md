@@ -80,13 +80,23 @@ $env:HF_TOKEN="<YOUR_HF_TOKEN>"
 .\.venv\Scripts\python inference.py
 ```
 
+Authentication options:
+1. Set `HF_TOKEN` explicitly in the shell before running the script.
+2. Or log in once with:
+```powershell
+hf auth login
+```
+Then omit `HF_TOKEN` and the script will fall back to the cached Hugging Face token from `huggingface_hub.get_token()`.
+
 Expected baseline behavior:
 - iterates over `easy_budget_cleanup_v1`, `medium_ambiguous_ledger_v1`, and `hard_operational_ledger_v1`
-- prints one summary line per task
-- prints an overall average score
-- falls back to a deterministic local categorization heuristic when model output is malformed
-- prints debug lines when request failure or parsing failure triggers fallback
-- reports per-task `model_actions`, `fallbacks`, and whether the run was fallback-driven
+- stdout contains only structured evaluation lines in this form:
+  - `[START] task=<task_name> env=<benchmark> model=<model_name>`
+  - `[STEP] step=<n> action=<action_str> reward=<0.00> done=<true|false> error=<msg|null>`
+  - `[END] success=<true|false> steps=<n> rewards=<r1,r2,...,rn>`
+- stderr contains debugging information such as request failures, parse failures, raw output previews, and fallback reasons
+- the baseline first retries transient provider failures, then switches from `Qwen/Qwen2.5-7B-Instruct:together` to `Qwen/Qwen2.5-7B-Instruct:fastest` if needed, and only then uses deterministic local fallback
+- falls back to a deterministic non-oracular heuristic that uses only public observation data
 
 ---
 

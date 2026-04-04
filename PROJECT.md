@@ -183,7 +183,8 @@ From the uploaded brief, the project must also include:
 - complete OpenEnv interface
 - typed models
 - `openenv.yaml`
-- baseline inference script using OpenAI API key from env vars
+- baseline inference script named `inference.py` at the root, using OpenAI client with `API_BASE_URL`, `MODEL_NAME`, and `HF_TOKEN` from env vars
+- strict `[START] / [STEP] / [END]` structured stdout logging contract
 - Hugging Face Space deployability
 - working Dockerfile
 - clear README documentation

@@ -38,7 +38,7 @@ try:
         TransactionRecord,
     )
 except ImportError:
-    from finance_env.grading import grade_easy_task, grade_hard_task, grade_medium_task
+    from grading import grade_easy_task, grade_hard_task, grade_medium_task
     from models import (
         ActionHistoryEntry,
         ActionType,

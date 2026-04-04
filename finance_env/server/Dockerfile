@@ -24,8 +24,8 @@ RUN apt-get update && \
 ARG BUILD_MODE=in-repo
 ARG ENV_NAME=finance_env
 
-# Copy environment code (always at root of build context)
-COPY . /app/env
+# Copy only the environment package from the repo root build context
+COPY finance_env /app/env
 
 # For in-repo builds, openenv is already vendored in the build context
 # For standalone builds, openenv will be installed via pyproject.toml
@@ -60,13 +60,13 @@ FROM ${BASE_IMAGE}
 WORKDIR /app
 
 # Copy the virtual environment from builder
-COPY --from=builder /app/env/.venv /app/.venv
+COPY --from=builder /app/env/.venv /app/env/.venv
 
 # Copy the environment code
 COPY --from=builder /app/env /app/env
 
 # Set PATH to use the virtual environment
-ENV PATH="/app/.venv/bin:$PATH"
+ENV PATH="/app/env/.venv/bin:$PATH"
 
 # Set PYTHONPATH so imports work correctly
 ENV PYTHONPATH="/app/env:$PYTHONPATH"

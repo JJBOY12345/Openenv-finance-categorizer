@@ -6,8 +6,12 @@
 
 """Finance Env environment."""
 
-from .client import FinanceEnv
 from .models import FinanceAction, FinanceObservation, FinanceState
+
+try:  # pragma: no cover - optional client export for environments that install client deps
+    from .client import FinanceEnv
+except ModuleNotFoundError:  # pragma: no cover
+    FinanceEnv = None
 
 __all__ = [
     "FinanceAction",
