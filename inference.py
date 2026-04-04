@@ -49,23 +49,17 @@ def load_config() -> BaselineConfig:
     """Load required environment variables and fail clearly if missing."""
 
     load_dotenv()
-    required = {
-        "API_BASE_URL": os.getenv("API_BASE_URL"),
-        "MODEL_NAME": os.getenv("MODEL_NAME"),
-        "HF_TOKEN": os.getenv("HF_TOKEN"),
-    }
-    missing = [name for name, value in required.items() if not value]
-    if missing:
-        raise SystemExit(
-            "Missing required environment variables: "
-            + ", ".join(missing)
-            + ". Set API_BASE_URL, MODEL_NAME, and HF_TOKEN before running inference.py."
-        )
+    api_base_url = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
+    model_name = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-7B-Instruct:fastest")
+    hf_token = os.getenv("HF_TOKEN")
+
+    if not hf_token:
+        raise SystemExit("Missing required environment variable: HF_TOKEN must be set.")
 
     return BaselineConfig(
-        api_base_url=required["API_BASE_URL"] or "",
-        model_name=required["MODEL_NAME"] or "",
-        hf_token=required["HF_TOKEN"] or "",
+        api_base_url=api_base_url,
+        model_name=model_name,
+        hf_token=hf_token,
     )
 
 
