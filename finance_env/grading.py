@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from typing import Mapping
 
-from .models import CategoryName, FinanceGraderResult, FinanceState
+try:
+    from .models import CategoryName, FinanceGraderResult, FinanceState
+except ImportError:  # pragma: no cover - support top-level runtime layout in Docker/HF
+    from models import CategoryName, FinanceGraderResult, FinanceState
 
 
 def grade_categorization_task(
