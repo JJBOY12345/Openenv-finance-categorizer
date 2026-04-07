@@ -9,6 +9,14 @@ try:
 except ImportError:  # pragma: no cover - support top-level runtime layout in Docker/HF
     from models import CategoryName, FinanceGraderResult, FinanceState
 
+EPS = 1e-6
+
+
+def safe_score(x: float) -> float:
+    """Clamp final task scores into the validator-required open interval (0, 1)."""
+
+    return max(EPS, min(1.0 - EPS, x))
+
 
 def grade_categorization_task(
     state: FinanceState,
@@ -35,7 +43,7 @@ def grade_categorization_task(
         - (0.1 if premature_finalize else 0.0)
         - 0.05 * invalid_action_rate
     )
-    score = max(0.0, min(1.0, round(raw_score, 4)))
+    score = safe_score(round(raw_score, 4))
 
     notes: list[str] = []
     if categorized_count == 0:

@@ -1,4 +1,5 @@
 from finance_env.models import ActionType, CategoryName, FinanceAction
+from finance_env.grading import EPS
 from finance_env.server.finance_env_environment import FinanceEnvironment
 
 
@@ -45,7 +46,7 @@ def test_invalid_transaction_gets_penalty_and_warning():
         )
     )
 
-    assert observation.reward == -0.51
+    assert observation.reward == 0.0
     assert observation.warnings == ["Unknown transaction id: missing_txn."]
     assert env.state.invalid_action_count == 1
     assert observation.ledger_summary.processed_count == 0
@@ -58,7 +59,7 @@ def test_finalize_before_completion_ends_episode_with_penalty():
     observation = env.step(FinanceAction(action_type=ActionType.FINALIZE))
 
     assert observation.done is True
-    assert observation.reward == -0.21
+    assert observation.reward == 0.0
     assert "Finalize called before all transactions were processed." in observation.warnings
     assert env.state.finalized is True
 
@@ -95,7 +96,7 @@ def test_wrong_categorization_does_not_leak_expected_label():
         )
     )
 
-    assert observation.reward == -0.21
+    assert observation.reward == 0.0
     assert "utilities" not in observation.last_reward.reason.lower()
     assert "utilities" not in observation.action_history[-1].outcome.lower()
 
@@ -123,7 +124,7 @@ def test_easy_grader_rewards_correct_complete_run():
 
     result = env.grade_episode()
 
-    assert result.score == 1.0
+    assert result.score == 1.0 - EPS
     assert result.categorized_accuracy == 1.0
     assert result.completion_ratio == 1.0
     assert result.premature_finalize is False
@@ -144,7 +145,7 @@ def test_easy_grader_penalizes_wrong_labels_and_premature_finalize():
 
     result = env.grade_episode()
 
-    assert 0.0 <= result.score <= 1.0
+    assert 0.0 < result.score < 1.0
     assert result.score < 0.5
     assert result.categorized_accuracy == 0.0
     assert result.completion_ratio == 0.2
@@ -189,7 +190,7 @@ def test_medium_grader_rewards_correct_complete_run():
 
     result = env.grade_episode()
 
-    assert result.score == 1.0
+    assert result.score == 1.0 - EPS
     assert result.categorized_accuracy == 1.0
     assert result.completion_ratio == 1.0
     assert result.premature_finalize is False
@@ -210,7 +211,7 @@ def test_medium_grader_penalizes_transfer_confusion_and_early_finalize():
 
     result = env.grade_episode()
 
-    assert 0.0 <= result.score <= 1.0
+    assert 0.0 < result.score < 1.0
     assert result.score < 0.5
     assert result.categorized_accuracy == 0.0
     assert result.completion_ratio == 0.2
@@ -258,7 +259,7 @@ def test_hard_grader_rewards_correct_complete_run():
 
     result = env.grade_episode()
 
-    assert result.score == 1.0
+    assert result.score == 1.0 - EPS
     assert result.categorized_accuracy == 1.0
     assert result.completion_ratio == 1.0
     assert result.premature_finalize is False
@@ -286,7 +287,7 @@ def test_hard_grader_penalizes_wrong_categorization():
 
     result = env.grade_episode()
 
-    assert 0.0 <= result.score <= 1.0
+    assert 0.0 < result.score < 1.0
     assert result.score < 0.5
     assert result.categorized_accuracy == 0.5
     assert result.completion_ratio == 0.25
@@ -301,8 +302,8 @@ def test_hard_grader_penalizes_premature_finalize():
 
     result = env.grade_episode()
 
-    assert 0.0 <= result.score <= 1.0
-    assert result.score == 0.0
+    assert 0.0 < result.score < 1.0
+    assert result.score == EPS
     assert result.categorized_accuracy == 0.0
     assert result.completion_ratio == 0.0
     assert result.premature_finalize is True
