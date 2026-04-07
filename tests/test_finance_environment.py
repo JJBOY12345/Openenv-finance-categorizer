@@ -3,6 +3,11 @@ from finance_env.grading import EPS
 from finance_env.server.finance_env_environment import FinanceEnvironment
 
 
+def assert_open_and_printable(value: float) -> None:
+    assert 0.0 < value < 1.0
+    assert f"{value:.2f}" not in {"0.00", "1.00"}
+
+
 def test_reset_returns_valid_initial_observation():
     env = FinanceEnvironment()
 
@@ -29,6 +34,7 @@ def test_valid_categorization_updates_state_and_reward():
     )
 
     assert observation.reward == 0.24
+    assert_open_and_printable(observation.reward)
     assert observation.ledger_summary.processed_count == 1
     assert observation.ledger_summary.unresolved_count == 4
     assert env.state.processed_entries["txn_001"].assigned_category == CategoryName.GROCERIES
@@ -47,6 +53,7 @@ def test_invalid_transaction_gets_penalty_and_warning():
     )
 
     assert observation.reward == EPS
+    assert_open_and_printable(observation.reward)
     assert observation.warnings == ["Unknown transaction id: missing_txn."]
     assert env.state.invalid_action_count == 1
     assert observation.ledger_summary.processed_count == 0
@@ -60,6 +67,7 @@ def test_finalize_before_completion_ends_episode_with_penalty():
 
     assert observation.done is True
     assert observation.reward == EPS
+    assert_open_and_printable(observation.reward)
     assert "Finalize called before all transactions were processed." in observation.warnings
     assert env.state.finalized is True
 
@@ -97,6 +105,7 @@ def test_wrong_categorization_does_not_leak_expected_label():
     )
 
     assert observation.reward == EPS
+    assert_open_and_printable(observation.reward)
     assert "utilities" not in observation.last_reward.reason.lower()
     assert "utilities" not in observation.action_history[-1].outcome.lower()
 
@@ -128,6 +137,10 @@ def test_easy_grader_rewards_correct_complete_run():
     assert result.categorized_accuracy == 1.0 - EPS
     assert result.completion_ratio == 1.0 - EPS
     assert result.invalid_action_rate == EPS
+    assert_open_and_printable(result.score)
+    assert_open_and_printable(result.categorized_accuracy)
+    assert_open_and_printable(result.completion_ratio)
+    assert_open_and_printable(result.invalid_action_rate)
     assert result.premature_finalize is False
 
 
@@ -151,6 +164,10 @@ def test_easy_grader_penalizes_wrong_labels_and_premature_finalize():
     assert result.categorized_accuracy == EPS
     assert result.completion_ratio == 0.2
     assert result.invalid_action_rate == EPS
+    assert_open_and_printable(result.score)
+    assert_open_and_printable(result.categorized_accuracy)
+    assert_open_and_printable(result.completion_ratio)
+    assert_open_and_printable(result.invalid_action_rate)
     assert result.premature_finalize is True
 
 
@@ -196,6 +213,10 @@ def test_medium_grader_rewards_correct_complete_run():
     assert result.categorized_accuracy == 1.0 - EPS
     assert result.completion_ratio == 1.0 - EPS
     assert result.invalid_action_rate == EPS
+    assert_open_and_printable(result.score)
+    assert_open_and_printable(result.categorized_accuracy)
+    assert_open_and_printable(result.completion_ratio)
+    assert_open_and_printable(result.invalid_action_rate)
     assert result.premature_finalize is False
 
 
@@ -219,6 +240,10 @@ def test_medium_grader_penalizes_transfer_confusion_and_early_finalize():
     assert result.categorized_accuracy == EPS
     assert result.completion_ratio == 0.2
     assert result.invalid_action_rate == EPS
+    assert_open_and_printable(result.score)
+    assert_open_and_printable(result.categorized_accuracy)
+    assert_open_and_printable(result.completion_ratio)
+    assert_open_and_printable(result.invalid_action_rate)
     assert result.premature_finalize is True
 
 
@@ -267,6 +292,10 @@ def test_hard_grader_rewards_correct_complete_run():
     assert result.categorized_accuracy == 1.0 - EPS
     assert result.completion_ratio == 1.0 - EPS
     assert result.invalid_action_rate == EPS
+    assert_open_and_printable(result.score)
+    assert_open_and_printable(result.categorized_accuracy)
+    assert_open_and_printable(result.completion_ratio)
+    assert_open_and_printable(result.invalid_action_rate)
     assert result.premature_finalize is False
 
 
@@ -297,6 +326,10 @@ def test_hard_grader_penalizes_wrong_categorization():
     assert result.categorized_accuracy == 0.5
     assert result.completion_ratio == 0.25
     assert result.invalid_action_rate == EPS
+    assert_open_and_printable(result.score)
+    assert_open_and_printable(result.categorized_accuracy)
+    assert_open_and_printable(result.completion_ratio)
+    assert_open_and_printable(result.invalid_action_rate)
     assert result.premature_finalize is True
 
 
@@ -313,4 +346,8 @@ def test_hard_grader_penalizes_premature_finalize():
     assert result.categorized_accuracy == EPS
     assert result.completion_ratio == EPS
     assert result.invalid_action_rate == EPS
+    assert_open_and_printable(result.score)
+    assert_open_and_printable(result.categorized_accuracy)
+    assert_open_and_printable(result.completion_ratio)
+    assert_open_and_printable(result.invalid_action_rate)
     assert result.premature_finalize is True

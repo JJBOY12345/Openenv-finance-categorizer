@@ -20,11 +20,11 @@ from typing import Dict, List, Optional
 from openenv.core.env_server.types import Action, Observation, State
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-EPS = 1e-6
+EPS = 0.01
 
 
 def safe_open_interval(x: float) -> float:
-    """Clamp validator-visible score and reward values into the open interval (0, 1)."""
+    """Clamp validator-visible score and reward values into a printable-safe open interval."""
 
     return max(EPS, min(1.0 - EPS, x))
 
