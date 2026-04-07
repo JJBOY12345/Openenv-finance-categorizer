@@ -18,7 +18,15 @@ from enum import Enum
 from typing import Dict, List, Optional
 
 from openenv.core.env_server.types import Action, Observation, State
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
+EPS = 1e-6
+
+
+def safe_open_interval(x: float) -> float:
+    """Clamp validator-visible score and reward values into the open interval (0, 1)."""
+
+    return max(EPS, min(1.0 - EPS, x))
 
 
 class FinanceBaseModel(BaseModel):
@@ -96,12 +104,24 @@ class RewardBreakdown(FinanceBaseModel):
 class FinanceReward(FinanceBaseModel):
     """Typed reward record aligned with the scalar reward returned by OpenEnv."""
 
-    value: float = Field(..., ge=0.0, le=1.0, description="Net reward for the last environment step")
+    value: float = Field(
+        ...,
+        gt=0.0,
+        lt=1.0,
+        description="Net reward for the last environment step, strictly bounded within (0, 1)",
+    )
     breakdown: RewardBreakdown = Field(
         default_factory=RewardBreakdown,
         description="Decomposed reward components for debugging",
     )
     reason: str = Field(default="", description="Short explanation of the reward")
+
+    @field_validator("value")
+    @classmethod
+    def validate_open_interval_value(cls, value: float) -> float:
+        """Reject exact boundary rewards at the model boundary."""
+
+        return safe_open_interval(value)
 
 
 class ActionHistoryEntry(FinanceBaseModel):
@@ -125,15 +145,27 @@ class LedgerSummary(FinanceBaseModel):
 class FinanceGraderResult(FinanceBaseModel):
     """Deterministic grading output for a completed or partial episode."""
 
-    score: float = Field(..., ge=0.0, le=1.0)
-    categorized_accuracy: float = Field(..., ge=0.0, le=1.0)
-    completion_ratio: float = Field(..., ge=0.0, le=1.0)
+    score: float = Field(..., gt=0.0, lt=1.0)
+    categorized_accuracy: float = Field(..., gt=0.0, lt=1.0)
+    completion_ratio: float = Field(..., gt=0.0, lt=1.0)
     finalized: bool = Field(..., description="Whether the episode was finalized")
     premature_finalize: bool = Field(
         ..., description="Whether finalize occurred before all transactions were processed"
     )
-    invalid_action_rate: float = Field(..., ge=0.0, le=1.0)
+    invalid_action_rate: float = Field(..., gt=0.0, lt=1.0)
     notes: List[str] = Field(default_factory=list)
+
+    @field_validator(
+        "score",
+        "categorized_accuracy",
+        "completion_ratio",
+        "invalid_action_rate",
+    )
+    @classmethod
+    def validate_open_interval_metrics(cls, value: float) -> float:
+        """Reject exact boundary grader metrics at the model boundary."""
+
+        return safe_open_interval(value)
 
 
 class FinanceAction(Action):

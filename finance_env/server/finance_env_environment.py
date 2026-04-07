@@ -36,6 +36,7 @@ try:
         RewardBreakdown,
         TaskFixture,
         TransactionRecord,
+        safe_open_interval,
     )
 except ImportError:
     from grading import grade_easy_task, grade_hard_task, grade_medium_task
@@ -54,6 +55,7 @@ except ImportError:
         RewardBreakdown,
         TaskFixture,
         TransactionRecord,
+        safe_open_interval,
     )
 
 
@@ -660,7 +662,7 @@ class FinanceEnvironment(Environment):
             + step_penalty,
             4,
         )
-        total = max(0.0, min(1.0, total))
+        total = safe_open_interval(total)
         return FinanceReward(value=total, breakdown=breakdown, reason=reason)
 
 

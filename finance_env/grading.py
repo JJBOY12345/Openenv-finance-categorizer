@@ -5,17 +5,15 @@ from __future__ import annotations
 from typing import Mapping
 
 try:
-    from .models import CategoryName, FinanceGraderResult, FinanceState
+    from .models import (
+        CategoryName,
+        FinanceGraderResult,
+        FinanceState,
+        EPS,
+        safe_open_interval,
+    )
 except ImportError:  # pragma: no cover - support top-level runtime layout in Docker/HF
-    from models import CategoryName, FinanceGraderResult, FinanceState
-
-EPS = 1e-6
-
-
-def safe_score(x: float) -> float:
-    """Clamp final task scores into the validator-required open interval (0, 1)."""
-
-    return max(EPS, min(1.0 - EPS, x))
+    from models import CategoryName, FinanceGraderResult, FinanceState, EPS, safe_open_interval
 
 
 def grade_categorization_task(
@@ -43,7 +41,7 @@ def grade_categorization_task(
         - (0.1 if premature_finalize else 0.0)
         - 0.05 * invalid_action_rate
     )
-    score = safe_score(round(raw_score, 4))
+    score = safe_open_interval(round(raw_score, 4))
 
     notes: list[str] = []
     if categorized_count == 0:
@@ -55,11 +53,11 @@ def grade_categorization_task(
 
     return FinanceGraderResult(
         score=score,
-        categorized_accuracy=round(categorized_accuracy, 4),
-        completion_ratio=round(completion_ratio, 4),
+        categorized_accuracy=safe_open_interval(round(categorized_accuracy, 4)),
+        completion_ratio=safe_open_interval(round(completion_ratio, 4)),
         finalized=state.finalized,
         premature_finalize=premature_finalize,
-        invalid_action_rate=round(min(invalid_action_rate, 1.0), 4),
+        invalid_action_rate=safe_open_interval(round(min(invalid_action_rate, 1.0), 4)),
         notes=notes,
     )
 
