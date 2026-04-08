@@ -94,11 +94,11 @@ class LedgerEntry(FinanceBaseModel):
 class RewardBreakdown(FinanceBaseModel):
     """Typed reward components kept for auditability and grading work later."""
 
-    correctness_reward: float = Field(default=0.0)
-    invalid_action_penalty: float = Field(default=0.0)
-    finalize_bonus: float = Field(default=0.0)
-    premature_finalize_penalty: float = Field(default=0.0)
-    step_penalty: float = Field(default=0.0)
+    correctness_reward: Optional[float] = Field(default=None)
+    invalid_action_penalty: Optional[float] = Field(default=None)
+    finalize_bonus: Optional[float] = Field(default=None)
+    premature_finalize_penalty: Optional[float] = Field(default=None)
+    step_penalty: Optional[float] = Field(default=None)
 
 
 class FinanceReward(FinanceBaseModel):

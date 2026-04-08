@@ -364,7 +364,11 @@ class FinanceEnvironment(Environment):
             self._state.warnings = [warning]
 
         self._state.last_reward = reward_detail
-        self._state.cumulative_reward += reward_detail.value
+        self._state.cumulative_reward = (
+            reward_detail.value
+            if self._state.cumulative_reward is None
+            else self._state.cumulative_reward + reward_detail.value
+        )
 
         return self._build_observation(
             warnings=self._state.warnings,
@@ -512,7 +516,11 @@ class FinanceEnvironment(Environment):
             reason=warning,
         )
         self._state.last_reward = reward_detail
-        self._state.cumulative_reward += reward_detail.value
+        self._state.cumulative_reward = (
+            reward_detail.value
+            if self._state.cumulative_reward is None
+            else self._state.cumulative_reward + reward_detail.value
+        )
         self._state.warnings = [warning]
         return self._build_observation(
             warnings=self._state.warnings,
@@ -538,7 +546,7 @@ class FinanceEnvironment(Environment):
             action_history=[],
             warnings=[],
             invalid_action_count=0,
-            cumulative_reward=0.0,
+            cumulative_reward=None,
             last_reward=None,
         )
 
@@ -650,11 +658,11 @@ class FinanceEnvironment(Environment):
         reason: str = "",
     ) -> FinanceReward:
         breakdown = RewardBreakdown(
-            correctness_reward=correctness_reward,
-            invalid_action_penalty=invalid_action_penalty,
-            finalize_bonus=finalize_bonus,
-            premature_finalize_penalty=premature_finalize_penalty,
-            step_penalty=step_penalty,
+            correctness_reward=correctness_reward or None,
+            invalid_action_penalty=invalid_action_penalty or None,
+            finalize_bonus=finalize_bonus or None,
+            premature_finalize_penalty=premature_finalize_penalty or None,
+            step_penalty=step_penalty or None,
         )
         total = round(
             correctness_reward
