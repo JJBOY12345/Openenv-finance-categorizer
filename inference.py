@@ -276,7 +276,9 @@ def compact_action_string(action: FinanceAction) -> str:
 def format_reward(value: float | None) -> str:
     """Format rewards consistently for stdout."""
 
-    numeric = 0.0 if value is None else float(value)
+    if value is None:
+        return "0.01"
+    numeric = max(0.01, min(0.99, float(value)))
     return f"{numeric:.2f}"
 
 

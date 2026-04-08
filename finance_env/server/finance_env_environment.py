@@ -375,7 +375,12 @@ class FinanceEnvironment(Environment):
     def state(self) -> FinanceState:
         """Return the public environment state without hidden answer data."""
 
-        return self._state
+        return self._state.model_copy(
+            update={
+                "cumulative_reward": None,
+                "last_reward": None,
+            }
+        )
 
     def grade_episode(self) -> FinanceGraderResult:
         """Grade the current episode deterministically based on the active task."""
@@ -555,11 +560,8 @@ class FinanceEnvironment(Environment):
 
         metadata = {
             "invalid_action_count": self._state.invalid_action_count,
-            "cumulative_reward": round(self._state.cumulative_reward, 4),
             "processed_transaction_ids": list(self._state.processed_entries.keys()),
         }
-        if reward_detail is not None:
-            metadata["reward_breakdown"] = reward_detail.breakdown.model_dump(mode="json")
 
         return FinanceObservation(
             task_id=self._state.task_id,
@@ -574,7 +576,7 @@ class FinanceEnvironment(Environment):
             warnings=warnings,
             current_transaction_id=current_transaction_id,
             step_budget_remaining=max(self._state.max_steps - self._state.step_count, 0),
-            last_reward=reward_detail,
+            last_reward=None,
             done=self._state.done,
             reward=None if reward_detail is None else reward_detail.value,
             metadata=metadata,

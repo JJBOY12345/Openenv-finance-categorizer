@@ -270,5 +270,5 @@ class FinanceState(State):
     action_history: List[ActionHistoryEntry] = Field(default_factory=list)
     warnings: List[str] = Field(default_factory=list)
     invalid_action_count: int = Field(default=0, ge=0)
-    cumulative_reward: float = Field(default=0.0)
+    cumulative_reward: Optional[float] = Field(default=None)
     last_reward: Optional[FinanceReward] = Field(default=None)
