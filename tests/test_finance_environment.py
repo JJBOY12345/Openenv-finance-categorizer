@@ -106,7 +106,9 @@ def test_wrong_categorization_does_not_leak_expected_label():
 
     assert observation.reward == EPS
     assert_open_and_printable(observation.reward)
-    assert "utilities" not in observation.last_reward.reason.lower()
+    assert observation.last_reward is None
+    assert "utilities" not in " ".join(observation.warnings).lower()
+    assert "utilities" not in str(observation.metadata).lower()
     assert "utilities" not in observation.action_history[-1].outcome.lower()
 
 
