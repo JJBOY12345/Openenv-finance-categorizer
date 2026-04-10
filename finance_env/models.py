@@ -116,7 +116,7 @@ class FinanceReward(FinanceBaseModel):
     )
     reason: str = Field(default="", description="Short explanation of the reward")
 
-    @field_validator("value")
+    @field_validator("value", mode="before")
     @classmethod
     def validate_open_interval_value(cls, value: float) -> float:
         """Reject exact boundary rewards at the model boundary."""
@@ -160,6 +160,7 @@ class FinanceGraderResult(FinanceBaseModel):
         "categorized_accuracy",
         "completion_ratio",
         "invalid_action_rate",
+        mode="before",
     )
     @classmethod
     def validate_open_interval_metrics(cls, value: float) -> float:

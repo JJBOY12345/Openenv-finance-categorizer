@@ -333,12 +333,12 @@ def print_step(step_index: int, action: FinanceAction, reward: float | None, don
     )
 
 
-def print_end(success: bool, rewards: list[float | None]) -> None:
+def print_end(success: bool, score: float, rewards: list[float | None]) -> None:
     """Emit the required end line."""
 
     reward_values = ",".join(format_reward(value) for value in rewards)
     print(
-        f"[END] success={str(success).lower()} steps={len(rewards)} rewards={reward_values}"
+        f"[END] success={str(success).lower()} steps={len(rewards)} score={score:.4f} rewards={reward_values}"
     )
 
 
@@ -387,10 +387,15 @@ def run_task(
                 "forced_finalize",
             )
 
-        print_end(True, rewards)
+        score = env.grade_episode().score
+        print_end(True, score, rewards)
     except Exception as exc:  # pragma: no cover - defensive baseline safeguard
         debug_log(f"[DEBUG] task={task_id} fatal_error={type(exc).__name__}:{exc}")
-        print_end(False, rewards)
+        try:
+            score = env.grade_episode().score
+        except Exception:
+            score = 0.01
+        print_end(False, score, rewards)
 
 
 def main() -> None:
